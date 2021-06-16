@@ -41,7 +41,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -204,13 +203,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   // Tracking
   @SuppressLint("CheckResult")
   private fun startTracking() {
-    RxPermissions(this).request(Manifest.permission.ACTIVITY_RECOGNITION)
-      .subscribe { isGranted ->
-        if (isGranted) {
-          setupStepCounterListener()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      RxPermissions(this).request(Manifest.permission.ACTIVITY_RECOGNITION)
+        .subscribe { isGranted ->
+          if (isGranted) {
+            setupStepCounterListener()
+          }
+          setupLocationChangeListener()
         }
-        setupLocationChangeListener()
-      }
+    } else {
+      setupStepCounterListener()
+      setupLocationChangeListener()
+    }
   }
 
   private fun stopTracking() {
