@@ -79,7 +79,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   // Location & Map
   private lateinit var mMap: GoogleMap
   lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-  val polylineOptions = PolylineOptions()
+  var polylineOptions = PolylineOptions()
+  val locationCallback = object: LocationCallback() {
+    override fun onLocationResult(locationResult: LocationResult?) {
+      super.onLocationResult(locationResult)
+      locationResult ?: return
+      locationResult.locations.forEach {
+        val trackingEntity = TrackingEntity(Calendar.getInstance().timeInMillis, it.latitude, it.longitude)
+        mapsActivityViewModel.insert(trackingEntity)
+      }
+    }
+  }
 
   // SharedPreferences
   companion object {
@@ -199,7 +209,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   }
 
   private fun stopTracking() {
+    polylineOptions = PolylineOptions()
+    
+    mapsActivityViewModel.deleteAllTrackingEntity()
+    fusedLocationProviderClient.removeLocationUpdates(locationCallback)
 
+    // Stop step sensor listener
+    val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+    sensorManager.unregisterListener(this, stepCounterSensor)
   }
 
   // Map related codes
@@ -274,17 +292,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
       val locationRequest = LocationRequest()
       locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
       locationRequest.interval = 5000 // 5000ms (5s)
-
-      val locationCallback = object: LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-          super.onLocationResult(locationResult)
-          locationResult ?: return
-          locationResult.locations.forEach {
-            val trackingEntity = TrackingEntity(Calendar.getInstance().timeInMillis, it.latitude, it.longitude)
-            mapsActivityViewModel.insert(trackingEntity)
-          }
-        }
-      }
       fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
   }
