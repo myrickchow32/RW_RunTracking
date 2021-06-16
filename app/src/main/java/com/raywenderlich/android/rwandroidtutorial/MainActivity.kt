@@ -36,20 +36,21 @@ package com.raywenderlich.android.runtracking
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.raywenderlich.android.runtracking.databinding.ActivityMainBinding
 
 /**
  * Main Screen
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(){
+  private lateinit var binding: ActivityMainBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
     // Switch to AppTheme for displaying the activity
     setTheme(R.style.AppTheme)
-
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-
-    // Your code
+    binding = ActivityMainBinding.inflate(layoutInflater)
+    val view = binding.root
+    setContentView(view)
 
 
   }
