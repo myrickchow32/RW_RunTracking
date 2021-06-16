@@ -38,6 +38,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
@@ -55,7 +57,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions
 /**
  * Main Screen
  */
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener {
   private lateinit var binding: ActivityMainBinding
 
   // Location & Map
@@ -139,7 +141,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
   private fun startTracking() {
     RxPermissions(this).request(Manifest.permission.ACTIVITY_RECOGNITION)
         .subscribe { isGranted ->
-          Log.d("TAG", "Is ACTIVITY_RECOGNITION permission granted: $isGranted")
+          if (isGranted) {
+            setupStepCounterListener()
+          }
         }
   }
 
@@ -174,4 +178,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hongKongLatLong, zoomLevel))
   }
 
+  // Step Counter related codes
+  private fun setupStepCounterListener() {
+    val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+    stepCounterSensor ?: return
+    sensorManager.registerListener(this@MainActivity, stepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST)
+  }
+
+  override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    Log.d("TAG", "onAccuracyChanged: Sensor: $sensor; accuracy: $accuracy")
+  }
+
+  override fun onSensorChanged(sensorEvent: SensorEvent?) {
+    Log.d("TAG", "onSensorChanged")
+    sensorEvent ?: return
+    val firstSensorEvent = sensorEvent.values.firstOrNull() ?: return
+    Log.d("TAG", "Steps count: $firstSensorEvent ")
+  }
 }
