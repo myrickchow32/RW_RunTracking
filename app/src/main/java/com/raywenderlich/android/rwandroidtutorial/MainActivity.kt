@@ -41,6 +41,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -54,6 +55,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 import com.raywenderlich.android.runtracking.databinding.ActivityMainBinding
 import com.tbruyelle.rxpermissions2.RxPermissions
 
@@ -66,6 +68,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   // Location & Map
   private lateinit var mMap: GoogleMap
   lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+  val polylineOptions = PolylineOptions()
 
   // SharedPreferences
   companion object {
@@ -185,6 +188,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hongKongLatLong, zoomLevel))
   }
 
+  fun addLocationToRoute(locations: List<Location>) {
+    mMap.clear()
+    val originalLatLngList = polylineOptions.points
+    val latLngList = locations.map {
+      LatLng(it.latitude, it.longitude)
+    }
+    originalLatLngList.addAll(latLngList)
+    mMap.addPolyline(polylineOptions)
+  }
+
+
   // Step Counter related codes
   private fun setupStepCounterListener() {
     val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -232,6 +246,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
           locationResult.locations.forEach {
             Log.d("TAG", "New location got: (${it.latitude}, ${it.longitude})")
           }
+          addLocationToRoute(locationResult.locations)
         }
       }
       fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
