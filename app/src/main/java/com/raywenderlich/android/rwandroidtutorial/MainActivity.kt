@@ -47,6 +47,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.*
@@ -57,13 +58,23 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import com.raywenderlich.android.runtracking.databinding.ActivityMainBinding
+import com.raywenderlich.android.rwandroidtutorial.MapsActivityViewModel
+import com.raywenderlich.android.rwandroidtutorial.MapsActivityViewModelFactory
+import com.raywenderlich.android.rwandroidtutorial.TrackingApplication
+import com.raywenderlich.android.rwandroidtutorial.TrackingEntity
 import com.tbruyelle.rxpermissions2.RxPermissions
+import java.util.*
 
 /**
  * Main Screen
  */
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener {
   private lateinit var binding: ActivityMainBinding
+
+  // ViewModel
+  private val mapsActivityViewModel: MapsActivityViewModel by viewModels {
+    MapsActivityViewModelFactory(getTrackingRepository())
+  }
 
   // Location & Map
   private lateinit var mMap: GoogleMap
@@ -113,10 +124,40 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     // Update layouts
     updateButtonStatus()
 
+    // 1
+    mapsActivityViewModel.allTrackingEntities.observe(this) { allTrackingEntities ->
+      if (allTrackingEntities.isEmpty()) {
+        updateAllDisplayText(0, 0f)
+      }
+    }
+
+    // 2
+    mapsActivityViewModel.lastTrackingEntity.observe(this) { lastTrackingEntity ->
+      lastTrackingEntity ?: return@observe
+      addLocationToRoute(lastTrackingEntity)
+    }
+
+    // 3
+    mapsActivityViewModel.totalDistanceTravelled.observe(this) {
+      it ?: return@observe
+      val stepCount = mapsActivityViewModel.currentNumberOfStepCount.value ?: 0
+      updateAllDisplayText(stepCount, it)
+    }
+
+    // 4
+    mapsActivityViewModel.currentNumberOfStepCount.observe(this) {
+      val totalDistanceTravelled = mapsActivityViewModel.totalDistanceTravelled.value ?: 0f
+      updateAllDisplayText(it, totalDistanceTravelled)
+    }
+
     if (isTracking) {
       startTracking()
     }
   }
+
+  // Repository
+  private fun getTrackingApplicationInstance() = application as TrackingApplication
+  private fun getTrackingRepository() = getTrackingApplicationInstance().trackingRepository
 
   // UI related codes
   private fun updateButtonStatus() {
@@ -188,16 +229,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hongKongLatLong, zoomLevel))
   }
 
-  fun addLocationToRoute(locations: List<Location>) {
+  private fun addLocationToRoute(trackingEntity: TrackingEntity) {
     mMap.clear()
-    val originalLatLngList = polylineOptions.points
-    val latLngList = locations.map {
-      LatLng(it.latitude, it.longitude)
-    }
-    originalLatLngList.addAll(latLngList)
+    val newLatLngInstance = trackingEntity.asLatLng()
+    polylineOptions.points.add(newLatLngInstance)
     mMap.addPolyline(polylineOptions)
   }
-
 
   // Step Counter related codes
   private fun setupStepCounterListener() {
@@ -242,11 +279,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         override fun onLocationResult(locationResult: LocationResult?) {
           super.onLocationResult(locationResult)
           locationResult ?: return
-
           locationResult.locations.forEach {
-            Log.d("TAG", "New location got: (${it.latitude}, ${it.longitude})")
+            val trackingEntity = TrackingEntity(Calendar.getInstance().timeInMillis, it.latitude, it.longitude)
+            mapsActivityViewModel.insert(trackingEntity)
           }
-          addLocationToRoute(locationResult.locations)
         }
       }
       fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
