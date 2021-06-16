@@ -293,6 +293,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     sensorEvent ?: return
     val firstSensorEvent = sensorEvent.values.firstOrNull() ?: return
     Log.d("TAG", "Steps count: $firstSensorEvent ")
+    val isFirstStepCountRecord = mapsActivityViewModel.currentNumberOfStepCount.value == 0
+    if (isFirstStepCountRecord) {
+      mapsActivityViewModel.initialStepCount = firstSensorEvent.toInt()
+      mapsActivityViewModel.currentNumberOfStepCount.value = 1
+    } else {
+      mapsActivityViewModel.currentNumberOfStepCount.value = firstSensorEvent.toInt() - mapsActivityViewModel.initialStepCount
+    }
   }
 
   // Location
