@@ -43,9 +43,12 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -62,6 +65,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
 
   // Location & Map
   private lateinit var mMap: GoogleMap
+  lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
   // SharedPreferences
   companion object {
@@ -84,6 +88,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
     mapFragment.getMapAsync(this)
 
+    // Location
+    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
     // Set up button click events
     binding.startButton.setOnClickListener {
@@ -140,11 +146,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   @SuppressLint("CheckResult")
   private fun startTracking() {
     RxPermissions(this).request(Manifest.permission.ACTIVITY_RECOGNITION)
-        .subscribe { isGranted ->
-          if (isGranted) {
-            setupStepCounterListener()
-          }
+      .subscribe { isGranted ->
+        if (isGranted) {
+          setupStepCounterListener()
         }
+        setupLocationChangeListener()
+      }
   }
 
   private fun stopTracking() {
@@ -195,5 +202,39 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     sensorEvent ?: return
     val firstSensorEvent = sensorEvent.values.firstOrNull() ?: return
     Log.d("TAG", "Steps count: $firstSensorEvent ")
+  }
+
+  // Location
+  @SuppressLint("CheckResult")
+  private fun runWithLocationPermissionChecking(callback: () -> Unit) {
+    RxPermissions(this).request(Manifest.permission.ACCESS_FINE_LOCATION)
+      .subscribe { isGranted ->
+        if (isGranted) {
+          callback()
+        } else {
+          Toast.makeText(this, "Please grant Location permission", Toast.LENGTH_LONG).show()
+        }
+      }
+  }
+
+  @SuppressLint("MissingPermission")
+  fun setupLocationChangeListener() {
+    runWithLocationPermissionChecking {
+      val locationRequest = LocationRequest()
+      locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+      locationRequest.interval = 5000 // 5000ms (5s)
+
+      val locationCallback = object: LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult?) {
+          super.onLocationResult(locationResult)
+          locationResult ?: return
+
+          locationResult.locations.forEach {
+            Log.d("TAG", "New location got: (${it.latitude}, ${it.longitude})")
+          }
+        }
+      }
+      fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+    }
   }
 }
