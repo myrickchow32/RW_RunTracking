@@ -50,6 +50,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.raywenderlich.android.runtracking.databinding.ActivityMainBinding
+import com.tbruyelle.rxpermissions2.RxPermissions
 
 /**
  * Main Screen
@@ -136,11 +137,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
   // Tracking
   @SuppressLint("CheckResult")
   private fun startTracking() {
-
+    RxPermissions(this).request(Manifest.permission.ACTIVITY_RECOGNITION)
+        .subscribe { isGranted ->
+          Log.d("TAG", "Is ACTIVITY_RECOGNITION permission granted: $isGranted")
+        }
   }
 
   private fun stopTracking() {
-    
+
   }
 
   // Map related codes
