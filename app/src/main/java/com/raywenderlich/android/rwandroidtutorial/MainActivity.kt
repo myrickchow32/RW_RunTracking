@@ -34,15 +34,24 @@
 
 package com.raywenderlich.android.runtracking
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.raywenderlich.android.runtracking.databinding.ActivityMainBinding
 
 /**
  * Main Screen
  */
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
   private lateinit var binding: ActivityMainBinding
+
+  // Location & Map
+  private lateinit var mMap: GoogleMap
 
   override fun onCreate(savedInstanceState: Bundle?) {
     // Switch to AppTheme for displaying the activity
@@ -52,6 +61,35 @@ class MainActivity : AppCompatActivity(){
     val view = binding.root
     setContentView(view)
 
-
+    // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+    val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+    mapFragment.getMapAsync(this)
   }
+  // Map related codes
+  /**
+   * Manipulates the map once available.
+   * This callback is triggered when the map is ready to be used.
+   * This is where we can add markers or lines, add listeners or move the camera. In this case,
+   * we just add a marker near Sydney, Australia.
+   * If Google Play services is not installed on the device, the user will be prompted to install
+   * it inside the SupportMapFragment. This method will only be triggered once the user has
+   * installed Google Play services and returned to the app.
+   */
+  @SuppressLint("MissingPermission")
+  override fun onMapReady(googleMap: GoogleMap) {
+    mMap = googleMap
+
+//    runWithLocationPermissionChecking {
+//      mMap.isMyLocationEnabled = true
+//    }
+
+    // Add a marker in Hong Kong and move the camera
+    val latitude = 22.3193
+    val longitude = 114.1694
+    val hongKongLatLong = LatLng(latitude, longitude)
+
+    val zoomLevel = 9.5f
+    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hongKongLatLong, zoomLevel))
+  }
+
 }
