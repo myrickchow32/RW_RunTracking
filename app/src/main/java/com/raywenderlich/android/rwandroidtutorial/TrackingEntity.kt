@@ -62,7 +62,6 @@ data class TrackingEntity(
     locationB.latitude = newTrackingEntity.latitude
     locationB.longitude = newTrackingEntity.longitude
 
-    val distanceInMeter = locationA.distanceTo(locationB)
-    return distanceInMeter
+    return locationA.distanceTo(locationB)
   }
 }

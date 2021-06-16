@@ -38,7 +38,7 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 
 // 1
-class MapsActivityViewModel(val trackingRepository: TrackingRepository): ViewModel() {
+class MapsActivityViewModel(private val trackingRepository: TrackingRepository): ViewModel() {
 
   // 2
   val allTrackingEntities: LiveData<List<TrackingEntity>> = trackingRepository.allTrackingEntities.asLiveData()

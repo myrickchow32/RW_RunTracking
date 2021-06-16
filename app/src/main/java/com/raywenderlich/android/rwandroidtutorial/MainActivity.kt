@@ -77,9 +77,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
 
   // Location & Map
   private lateinit var mMap: GoogleMap
-  lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-  var polylineOptions = PolylineOptions()
-  val locationCallback = object: LocationCallback() {
+  private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+  private var polylineOptions = PolylineOptions()
+  private val locationCallback = object: LocationCallback() {
     override fun onLocationResult(locationResult: LocationResult?) {
       super.onLocationResult(locationResult)
       locationResult ?: return

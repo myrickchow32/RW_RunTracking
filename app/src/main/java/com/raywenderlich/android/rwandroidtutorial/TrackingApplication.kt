@@ -39,6 +39,6 @@ import android.app.Application
 // 1
 class TrackingApplication: Application() {
   // 2
-  val trackingDatabase by lazy { TrackingDatabase.getDatabase(this) }
+  private val trackingDatabase by lazy { TrackingDatabase.getDatabase(this) }
   val trackingRepository by lazy { TrackingRepository(trackingDatabase.getTrackingDao()) }
 }
