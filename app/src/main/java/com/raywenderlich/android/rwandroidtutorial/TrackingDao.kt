@@ -65,4 +65,8 @@ interface TrackingDao {
   // 6
   @Query("DELETE FROM trackingentity")
   suspend fun deleteAll()
+
+  // 7
+  @Query("SELECT * FROM trackingentity")
+  suspend fun getAllTrackingEntitiesRecord(): List<TrackingEntity>
 }

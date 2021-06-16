@@ -60,4 +60,8 @@ class TrackingRepository(private val trackingDao: TrackingDao) {
   suspend fun deleteAll() {
     trackingDao.deleteAll()
   }
+
+  @Suppress("RedundantSuspendModifier")
+  @WorkerThread
+  suspend fun getAllTrackingEntitiesRecord() = trackingDao.getAllTrackingEntitiesRecord()
 }

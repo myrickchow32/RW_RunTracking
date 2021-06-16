@@ -160,6 +160,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
       updateAllDisplayText(it, totalDistanceTravelled)
     }
 
+    // 5
+    mapsActivityViewModel.allTrackingEntitiesRecord.observe(this) {
+      addLocationListToRoute(it)
+    }
+
     if (isTracking) {
       startTracking()
     }
@@ -210,7 +215,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
 
   private fun stopTracking() {
     polylineOptions = PolylineOptions()
-    
+
     mapsActivityViewModel.deleteAllTrackingEntity()
     fusedLocationProviderClient.removeLocationUpdates(locationCallback)
 
@@ -245,6 +250,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
 
     val zoomLevel = 9.5f
     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hongKongLatLong, zoomLevel))
+
+    // Draw all the previous points on the map
+    if (isTracking) {
+      mapsActivityViewModel.getAllTrackingEntities()
+    }
+  }
+
+  private fun addLocationListToRoute(trackingEntityList: List<TrackingEntity>) {
+    if (!this::mMap.isInitialized) {
+      return
+    }
+    mMap.clear()
+    trackingEntityList.forEach { trackingEntity ->
+      val newLatLngInstance = trackingEntity.asLatLng()
+      polylineOptions.points.add(newLatLngInstance)
+    }
+    mMap.addPolyline(polylineOptions)
   }
 
   private fun addLocationToRoute(trackingEntity: TrackingEntity) {

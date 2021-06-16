@@ -42,10 +42,16 @@ class MapsActivityViewModel(val trackingRepository: TrackingRepository): ViewMod
 
   // 2
   val allTrackingEntities: LiveData<List<TrackingEntity>> = trackingRepository.allTrackingEntities.asLiveData()
+  val allTrackingEntitiesRecord: MutableLiveData<List<TrackingEntity>> = MutableLiveData(listOf())
   val lastTrackingEntity: LiveData<TrackingEntity?> = trackingRepository.lastTrackingEntity.asLiveData()
   val totalDistanceTravelled: LiveData<Float?> = trackingRepository.totalDistanceTravelled.asLiveData()
   val currentNumberOfStepCount = MutableLiveData(0)
   var initialStepCount = 0
+
+  // 4
+  fun getAllTrackingEntities() = viewModelScope.launch {
+    allTrackingEntitiesRecord.value =  trackingRepository.getAllTrackingEntitiesRecord()
+  }
 
   // 3
   fun insert(trackingEntity: TrackingEntity) = viewModelScope.launch {
