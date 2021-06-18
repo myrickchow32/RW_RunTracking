@@ -67,7 +67,7 @@ import java.util.*
 /**
  * Main Screen
  */
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener {
   private lateinit var binding: ActivityMainBinding
 
   // ViewModel
@@ -285,7 +285,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
     stepCounterSensor ?: return
-    sensorManager.registerListener(this@MainActivity, stepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST)
+    sensorManager.registerListener(this@MapsActivity, stepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST)
   }
 
   override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
