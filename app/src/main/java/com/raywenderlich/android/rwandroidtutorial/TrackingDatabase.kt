@@ -55,8 +55,8 @@ abstract class TrackingDatabase : RoomDatabase() {
 
     fun getDatabase(context: Context): TrackingDatabase {
       return INSTANCE ?: synchronized(this) {
-        INSTANCE = Room.databaseBuilder(context.applicationContext, TrackingDatabase::class.java,"word_database").build()
-        INSTANCE!!
+        INSTANCE = Room.databaseBuilder(context.applicationContext, TrackingDatabase::class.java,"run_database").build()
+        INSTANCE!!word_database
       }
     }
   }
