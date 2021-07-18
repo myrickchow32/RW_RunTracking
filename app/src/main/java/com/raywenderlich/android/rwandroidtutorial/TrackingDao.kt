@@ -34,25 +34,25 @@
 
 package com.raywenderlich.android.rwandroidtutorial
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TrackingDao {
   // 1
   @Query("SELECT * FROM trackingentity")
-  fun getAllTrackingEntities(): Flow<List<TrackingEntity>>
+  fun getAllTrackingEntities(): LiveData<List<TrackingEntity>>
 
   // 2
   @Query("SELECT SUM(distanceTravelled) FROM trackingentity")
-  fun getTotalDistanceTravelled(): Flow<Float>
+  fun getTotalDistanceTravelled(): LiveData<Float>
 
   // 3
   @Query("SELECT * FROM trackingentity ORDER BY timestamp DESC LIMIT 1")
-  fun getLastTrackingEntity(): Flow<TrackingEntity?>
+  fun getLastTrackingEntity(): LiveData<TrackingEntity?>
 
   // 4
   @Query("SELECT * FROM trackingentity ORDER BY timestamp DESC LIMIT 1")
