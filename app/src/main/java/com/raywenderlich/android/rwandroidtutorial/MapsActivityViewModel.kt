@@ -41,10 +41,10 @@ import kotlinx.coroutines.launch
 class MapsActivityViewModel(private val trackingRepository: TrackingRepository): ViewModel() {
 
   // 2
-  val allTrackingEntities: LiveData<List<TrackingEntity>> = trackingRepository.allTrackingEntities.asLiveData()
+  val allTrackingEntities: LiveData<List<TrackingEntity>> = trackingRepository.allTrackingEntities
   val allTrackingEntitiesRecord: MutableLiveData<List<TrackingEntity>> = MutableLiveData(listOf())
-  val lastTrackingEntity: LiveData<TrackingEntity?> = trackingRepository.lastTrackingEntity.asLiveData()
-  val totalDistanceTravelled: LiveData<Float?> = trackingRepository.totalDistanceTravelled.asLiveData()
+  val lastTrackingEntity: LiveData<TrackingEntity?> = trackingRepository.lastTrackingEntity
+  val totalDistanceTravelled: LiveData<Float?> = trackingRepository.totalDistanceTravelled
   val currentNumberOfStepCount = MutableLiveData(0)
   var initialStepCount = 0
 

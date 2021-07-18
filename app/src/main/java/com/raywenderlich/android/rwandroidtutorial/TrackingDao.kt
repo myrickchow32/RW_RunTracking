@@ -48,7 +48,7 @@ interface TrackingDao {
 
   // 2
   @Query("SELECT SUM(distanceTravelled) FROM trackingentity")
-  fun getTotalDistanceTravelled(): LiveData<Float>
+  fun getTotalDistanceTravelled(): LiveData<Float?>
 
   // 3
   @Query("SELECT * FROM trackingentity ORDER BY timestamp DESC LIMIT 1")
