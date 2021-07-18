@@ -63,7 +63,10 @@ import com.raywenderlich.android.rwandroidtutorial.TrackingApplication
 import com.raywenderlich.android.rwandroidtutorial.TrackingEntity
 import com.tbruyelle.rxpermissions2.RxPermissions
 import java.util.*
-
+import com.vmadalin.easypermissions.EasyPermissions
+import com.vmadalin.easypermissions.annotations.AfterPermissionGranted
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.ACTIVITY_RECOGNITION
 /**
  * Main Screen
  */
@@ -94,7 +97,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   companion object {
     private const val KEY_SHARED_PREFERENCE = "com.rwRunTrackingApp.sharedPreferences"
     private const val KEY_IS_TRACKING = "com.rwRunTrackingApp.isTracking"
+
+    // Permission
+    private const val REQUEST_CODE_FINE_LOCATION = 1
+    private const val REQUEST_CODE_ACTIVITY_RECOGNITION = 2
+
   }
+
   private var isTracking: Boolean
     get() = this.getSharedPreferences(KEY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getBoolean(KEY_IS_TRACKING, false)
     set(value) = this.getSharedPreferences(KEY_SHARED_PREFERENCE, Context.MODE_PRIVATE).edit().putBoolean(KEY_IS_TRACKING, value).apply()
@@ -201,19 +210,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   }
 
   // Tracking
-  @SuppressLint("CheckResult")
+  @AfterPermissionGranted(REQUEST_CODE_ACTIVITY_RECOGNITION)
   private fun startTracking() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      RxPermissions(this).request(Manifest.permission.ACTIVITY_RECOGNITION)
-        .subscribe { isGranted ->
-          if (isGranted) {
-            setupStepCounterListener()
-          }
-          setupLocationChangeListener()
-        }
-    } else {
+    val isActivityRecognitionPermissionFree = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+    val isActivityRecognitionPermissionGranted = EasyPermissions.hasPermissions(this,
+        ACTIVITY_RECOGNITION)
+    if (isActivityRecognitionPermissionFree || isActivityRecognitionPermissionGranted) {
       setupStepCounterListener()
       setupLocationChangeListener()
+    } else {
+      // Do not have permissions, request them now
+      EasyPermissions.requestPermissions(
+          host = this,
+          rationale = "For showing your step counts and calculate the average pace.",
+          requestCode = REQUEST_CODE_ACTIVITY_RECOGNITION,
+          perms = *arrayOf(ACTIVITY_RECOGNITION)
+      )
     }
   }
 
@@ -319,13 +331,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
       }
   }
 
-  @SuppressLint("MissingPermission")
-  fun setupLocationChangeListener() {
-    runWithLocationPermissionChecking {
+  @AfterPermissionGranted(REQUEST_CODE_FINE_LOCATION)
+  private fun setupLocationChangeListener() {
+    if (EasyPermissions.hasPermissions(this, ACCESS_FINE_LOCATION)) {
       val locationRequest = LocationRequest()
       locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
       locationRequest.interval = 5000 // 5000ms (5s)
       fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+    } else {
+      // Do not have permissions, request them now
+      EasyPermissions.requestPermissions(
+          host = this,
+          rationale = "For showing your current location on the map.",
+          requestCode = REQUEST_CODE_FINE_LOCATION,
+          perms = *arrayOf(ACCESS_FINE_LOCATION)
+      )
     }
+  }
+
+  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
+      grantResults: IntArray) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+    // EasyPermissions handles the request result.
+    EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
   }
 }
