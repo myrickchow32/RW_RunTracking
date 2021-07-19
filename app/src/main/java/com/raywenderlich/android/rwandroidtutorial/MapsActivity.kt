@@ -54,7 +54,7 @@ import com.raywenderlich.android.runtracking.databinding.ActivityMainBinding
 /**
  * Main Screen
  */
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
   private lateinit var binding: ActivityMainBinding
 
   // Location & Map
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private const val REQUEST_CODE_FINE_LOCATION = 1
     private const val REQUEST_CODE_ACTIVITY_RECOGNITION = 2
   }
-  
+
   private var isTracking: Boolean
     get() = this.getSharedPreferences(KEY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getBoolean(KEY_IS_TRACKING, false)
     set(value) = this.getSharedPreferences(KEY_SHARED_PREFERENCE, Context.MODE_PRIVATE).edit().putBoolean(KEY_IS_TRACKING, value).apply()
