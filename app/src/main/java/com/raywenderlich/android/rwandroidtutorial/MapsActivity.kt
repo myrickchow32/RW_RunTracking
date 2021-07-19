@@ -92,15 +92,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     }
   }
 
-  // SharedPreferences
   companion object {
+    // SharedPreferences
     private const val KEY_SHARED_PREFERENCE = "com.rwRunTrackingApp.sharedPreferences"
     private const val KEY_IS_TRACKING = "com.rwRunTrackingApp.isTracking"
 
     // Permission
     private const val REQUEST_CODE_FINE_LOCATION = 1
     private const val REQUEST_CODE_ACTIVITY_RECOGNITION = 2
-
   }
 
   private var isTracking: Boolean
