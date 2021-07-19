@@ -60,11 +60,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
   // Location & Map
   private lateinit var mMap: GoogleMap
 
-  // SharedPreferences
   companion object {
+    // SharedPreferences
     private const val KEY_SHARED_PREFERENCE = "com.rwRunTrackingApp.sharedPreferences"
     private const val KEY_IS_TRACKING = "com.rwRunTrackingApp.isTracking"
+
+    // Permission
+    private const val REQUEST_CODE_FINE_LOCATION = 1
+    private const val REQUEST_CODE_ACTIVITY_RECOGNITION = 2
   }
+  
   private var isTracking: Boolean
     get() = this.getSharedPreferences(KEY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getBoolean(KEY_IS_TRACKING, false)
     set(value) = this.getSharedPreferences(KEY_SHARED_PREFERENCE, Context.MODE_PRIVATE).edit().putBoolean(KEY_IS_TRACKING, value).apply()
