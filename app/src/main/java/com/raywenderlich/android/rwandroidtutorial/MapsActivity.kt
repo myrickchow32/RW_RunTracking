@@ -214,6 +214,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     val isActivityRecognitionPermissionFree = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
     val isActivityRecognitionPermissionGranted = EasyPermissions.hasPermissions(this,
         ACTIVITY_RECOGNITION)
+    Log.d("TAG", "Is ACTIVITY_RECOGNITION permission granted $isActivityRecognitionPermissionGranted")
     if (isActivityRecognitionPermissionFree || isActivityRecognitionPermissionGranted) {
       setupStepCounterListener()
       setupLocationChangeListener()
