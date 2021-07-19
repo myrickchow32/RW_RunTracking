@@ -254,9 +254,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   override fun onMapReady(googleMap: GoogleMap) {
     mMap = googleMap
 
-    runWithLocationPermissionChecking {
-      mMap.isMyLocationEnabled = true
-    }
+    showUserLocation()
 
     // Add a marker in Hong Kong and move the camera
     val latitude = 22.3193
@@ -318,16 +316,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
   }
 
   // Location
-  @SuppressLint("CheckResult")
-  private fun runWithLocationPermissionChecking(callback: () -> Unit) {
-    RxPermissions(this).request(Manifest.permission.ACCESS_FINE_LOCATION)
-      .subscribe { isGranted ->
-        if (isGranted) {
-          callback()
-        } else {
-          Toast.makeText(this, "Please grant Location permission", Toast.LENGTH_LONG).show()
-        }
-      }
+  @AfterPermissionGranted(REQUEST_CODE_FINE_LOCATION)
+  private fun showUserLocation() {
+    if (EasyPermissions.hasPermissions(this, ACCESS_FINE_LOCATION)) {
+      mMap.isMyLocationEnabled = true
+    } else {
+      // Do not have permissions, request them now
+      EasyPermissions.requestPermissions(
+          host = this,
+          rationale = "For showing your current location on the map.",
+          requestCode = REQUEST_CODE_FINE_LOCATION,
+          perms = *arrayOf(ACCESS_FINE_LOCATION)
+      )
+    }
   }
 
   @AfterPermissionGranted(REQUEST_CODE_FINE_LOCATION)
