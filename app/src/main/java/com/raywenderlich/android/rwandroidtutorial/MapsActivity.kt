@@ -61,7 +61,6 @@ import com.raywenderlich.android.rwandroidtutorial.MapsActivityViewModel
 import com.raywenderlich.android.rwandroidtutorial.MapsActivityViewModelFactory
 import com.raywenderlich.android.rwandroidtutorial.TrackingApplication
 import com.raywenderlich.android.rwandroidtutorial.TrackingEntity
-import com.tbruyelle.rxpermissions2.RxPermissions
 import java.util.*
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.annotations.AfterPermissionGranted
